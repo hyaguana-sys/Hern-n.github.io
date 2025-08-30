@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Minicampus: Antes del Clic</title>
+  <style>
+    :root {
+      --primary: #4a6fa5;
+      --primary-dark: #3a5a8a;
+      --secondary: #62b5e5;
+      --success: #5cb85c;
+      --warning: #f0ad4e;
+      --danger: #d9534f;
+      --dark: #212529;
+      --light: #f8f9fa;
+      --bg: #ffffff;
+      --text: #212529;
+      --border: #dee2e6;
+      --shadow: 0 2px 8px rgba(0,0,0,0.1);
+      --radius: 8px;
+      --font-main: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      --font-mono: 'Courier New', monospace;
+      --transition: all 0.3s ease;
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --text: #e0e0e0;
+      --border: #333;
+      --shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      transition: var(--transition);
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      color: var(--primary);
+      margin-bottom: 0.8rem;
+    }
+
+    h1 { font-size: 2.2rem; }
+    h2 { font-size: 1.8rem; }
+    h3 { font-size: 1.5rem; }
+    h4 { font-size: 1.3rem; }
+
+    p { margin-bottom: 1rem; }
+
+    img, svg { max-width: 100%; height: auto; }
+
+    button, .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+
+    button:hover, .btn:hover {
+      background: var(--primary-dark);
+    }
+
+    button.secondary { background: var(--secondary); }
+    button.success { background: var(--success); }
+    button.warning { background: var(--warning); }
+    button.danger { background: var(--danger); }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    nav.topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 1rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav.topbar input[type="search"] {
+      padding: 0.5rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      width: 250px;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .sidebar {
+      position: fixed;
+      left: -300px;
+      top: 0;
+      width: 280px;
+      height: 100%;
+      background: var(--bg);
+      border-right: 1px solid var(--border);
+      padding: 2rem 1rem;
+      z-index: 1000;
+      overflow-y: auto;
+      transition: var(--transition);
+    }
+
+    .sidebar.open {
+      left: 0;
+    }
+
+    .sidebar ul {
+      list-style: none;
+    }
+
+    .sidebar li {
+      margin-bottom: 0.8rem;
+    }
+
+    .sidebar a {
+      color: var(--text);
+      text-decoration: none;
+      display: block;
+      padding: 0.5rem;
+      border-radius: var(--radius);
+    }
+
+    .sidebar a:hover {
+      background: var(--light);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+      display: none;
+    }
+
+    .main-content {
+      margin-left: 0;
+      margin-top: 1rem;
+      padding-bottom: 5rem;
+    }
+
+    .breadcrumb {
+      font-size: 0.9rem;
+      color: var(--text);
+      opacity: 0.8;
+      margin-bottom: 1rem;
+    }
+
+    .breadcrumb a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .tab-container {
+      margin: 1.5rem 0;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1rem;
+      background: var(--light);
+      border: none;
+      border-radius: 4px 4px 0 0;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 8px 8px 8px;
+    }
+
+    .accordion {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 0.8rem;
+      overflow: hidden;
+    }
+
+    .accordion-header {
+      background: var(--light);
+      padding: 1rem;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .accordion-header::after {
+      content: '+';
+      font-size: 1.2rem;
+    }
+
+    .accordion-header.active::after {
+      content: '−';
+    }
+
+    .accordion-body {
+      padding: 0 1rem;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .accordion-body.open {
+      max-height: 500px;
+      padding: 1rem;
+    }
+
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: var(--dark);
+      color: white;
+      text-align: center;
+      border-radius: 6px;
+      padding: 0.5rem;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -100px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 0.9rem;
+    }
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .callout {
+      padding: 1rem;
+      border-radius: var(--radius);
+      margin: 1rem 0;
+      border-left: 4px solid var(--primary);
+    }
+
+    .callout.note {
+      background: #e7f3ff;
+      border-color: #62b5e5;
+    }
+
+    .callout.alert {
+      background: #fff3cd;
+      border-color: #f0ad4e;
+    }
+
+    .callout.ethics {
+      background: #f8f9fa;
+      border-color: #4a6fa5;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      background: var(--light);
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .btn-toggle-theme {
+      background: var(--secondary);
+    }
+
+    .progress-bar {
+      height: 10px;
+      background: var(--border);
+      border-radius: 5px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--success);
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.3rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      margin: 0.3rem;
+      background: var(--secondary);
+      color: white;
+    }
+
+    .game-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin: 1rem 0;
+      background: var(--light);
+    }
+
+    .match-game {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .match-item {
+      padding: 0.8rem;
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .match-item.selected {
+      background: var(--primary);
+      color: white;
+    }
+
+    .drag-area {
+      min-height: 100px;
+      border: 2px dashed var(--warning);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+
+    .draggable {
+      display: inline-block;
+      margin: 0.3rem;
+      padding: 0.5rem;
+      background: var(--primary);
+      color: white;
+      border-radius: var(--radius);
+    }
+
+    @media (min-width: 768px) {
+      .main-content {
+        margin-left: 300px;
+      }
+
+      .sidebar {
+        left: 0;
+      }
+
+      .overlay {
+        display: none;
+      }
+    }
+
+    .hidden { display: none !important; }
+
+    .focus-visible:focus {
+      outline: 3px solid var(--secondary);
+      outline-offset: 2px;
+    }
+
+    .touch-area {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 600px;
+      background: var(--bg);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      padding: 2rem;
+      z-index: 1100;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1050;
+      display: none;
+    }
+
+    .svg-diagram {
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+
+    .quiz {
+      margin: 1.5rem 0;
+    }
+
+    .quiz .options label {
+      display: block;
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      background: var(--light);
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+
+    .quiz .options label:hover {
+      background: #e9ecef;
+    }
+
+    .feedback {
+      margin: 1rem 0;
+      padding: 1rem;
+      border-radius: var(--radius);
+      background: #e7f3ff;
+    }
+
+    .btn-print {
+      font-size: 0.9rem;
+      padding: 0.4rem 0.8rem;
+    }
+
+    .stepper {
+      counter-reset: step;
+      display: flex;
+      margin: 1.5rem 0;
+    }
+
+    .step {
+      flex: 1;
+      text-align: center;
+      position: relative;
+    }
+
+    .step::before {
+      content: counter(step);
+      counter-increment: step;
+      width: 30px;
+      height: 30px;
+      line-height: 30px;
+      border-radius: 50%;
+      background: var(--border);
+      color: var(--text);
+      display: block;
+      margin: 0 auto 0.5rem;
+    }
+
+    .step.active::before {
+      background: var(--primary);
+      color: white;
+    }
+
+    .step.completed::before {
+      background: var(--success);
+      color: white;
+      content: "✓";
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+
+    .table th, .table td {
+      padding: 0.8rem;
+      border: 1px solid var(--border);
+      text-align: left;
+    }
+
+    .table th {
+      background: var(--light);
+    }
+
+    .timeline {
+      position: relative;
+      margin: 2rem 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 20px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-left: 50px;
+      margin-bottom: 1rem;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 14px;
+      top: 8px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+
+    .notes-export {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      padding: 1rem;
+      border-radius: var(--radius);
+      margin: 1rem 0;
+    }
+
+    .user-dashboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .dashboard-card {
+      padding: 1rem;
+      background: var(--light);
+      border-radius: var(--radius);
+    }
+
+    .level-indicator {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .streak {
+      color: var(--warning);
+      font-weight: bold;
+    }
+
+    .highlight {
+      background-color: var(--warning);
+      padding: 0.1rem 0.3rem;
+      border-radius: 3px;
+    }
+
+    [role="button"], button, input, select, textarea {
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Estructura del minicampus en JSON -->
+  <script type="application/json" id="campus-data">
+  {
+    "title": "Antes del Clic: Ecosistema y Conciencia para un Uso Inteligente de la IA",
+    "author": "Hernán Yaguana",
+    "year": 2025,
+    "modules": [
+      {
+        "id": 1,
+        "title": "El Mapa Antes del Territorio",
+        "objectives": [
+          "Identificar la necesidad de planificar antes de usar IA",
+          "Formular intenciones claras de uso",
+          "Evitar errores comunes al comenzar con IA"
+        ],
+        "competencies": ["Pensamiento crítico", "Planificación estratégica", "Autonomía tecnológica"],
+        "keywords": ["planificación", "intención", "errores", "flujos", "objetivo"],
+        "summary": "Este módulo introduce la importancia de detenerse a pensar antes de interactuar con herramientas de IA. Se exploran estrategias para definir propósitos claros, evitar el deslumbramiento tecnológico y construir flujos mínimos viables.",
+        "conceptMap": "Propósito → Herramienta → Validación → Ajuste",
+        "lessons": [
+          {
+            "title": "¿Por qué pensar antes de usar IA?",
+            "content": "<p>La tecnología avanza más rápido que nuestra capacidad para reflexionar sobre ella. Muchos usuarios caen en el <strong>deslumbramiento</strong>, la <strong>sobrecarga</strong> o la <strong>desorientación</strong> al usar IA sin un propósito claro.</p><p>Como dice el libro: <em>\"Nadie nos enseñó a preguntar. Nadie nos formó en el arte de discernir entre necesidad real y ansiedad digital\"</em>.</p>",
+            "visual": "<svg class='svg-diagram' viewBox='0 0 400 200' xmlns='http://www.w3.org/2000/svg'><rect x='50' y='80' width='100' height='40' fill='#4a6fa5' rx='8'/><text x='100' y='105' fill='white' font-size='14' text-anchor='middle'>Propósito</text><path d='M150,100 H200' stroke='#666' stroke-width='2' marker-end='url(#arrow)' fill='none'/><rect x='200' y='80' width='100' height='40' fill='#62b5e5' rx='8'/><text x='250' y='105' fill='white' font-size='14' text-anchor='middle'>Herramienta</text></svg><defs><marker id='arrow' markerWidth='10' markerHeight='10' refX='9' refY='3' orient='auto' markerUnits='stroke-width'><path d='M0,0 L0,6 L9,3 z' fill='#666'/></marker></defs>"
+          },
+          {
+            "title": "Errores comunes al comenzar",
+            "content": "<p>Los tres errores principales son:</p><ul><li><strong>Deslumbramiento:</strong> usar IA por novedad, no por necesidad.</li><li><strong>Sobrecarga:</strong> intentar hacer todo con IA sin estructura.</li><li><strong>Desorientación:</strong> perder el enfoque original.</li></ul><p>La solución: <strong>revertir la lógica</strong>. No de la herramienta al propósito, sino del propósito a la herramienta.</p>",
+            "activity": "Completa esta plantilla: ¿Qué quiero lograr? ¿Por qué? ¿Para quién? ¿Cómo evaluaré el éxito?"
+          }
+        ],
+        "caseStudy": "Un docente usa ChatGPT para generar todo un curso en un día. El resultado es genérico, poco alineado con sus estudiantes y sin posibilidad de ajuste. Con planificación previa, hubiera usado IA solo para generar ejemplos o actividades específicas.",
+        "keyIdeas": [
+          "Primero piensa, luego usa",
+          "La herramienta no define el fin",
+          "Valida iterativamente"
+        ],
+        "quiz": [
+          {
+            "question": "¿Cuál es el primer paso para un uso inteligente de la IA?",
+            "options": [
+              "Elegir la herramienta más avanzada",
+              "Definir claramente el propósito",
+              "Automatizar todo el proceso",
+              "Buscar tutoriales en YouTube"
+            ],
+            "correct": 1,
+            "feedback": "Correcto. Como dice el libro: 'Solo una vez definidas variables como el propósito, motivación y público, se puede preguntar qué herramienta usar.'"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Flujo, Fricción y Frontera",
+        "objectives": [
+          "Diseñar flujos de trabajo con IA",
+          "Identificar tareas automatizables",
+          "Establecer límites éticos"
+        ],
+        "competencies": ["Diseño de flujos", "Toma de decisiones", "Ética aplicada"],
+        "keywords": ["flujo", "automatización", "fricción", "frontera", "tareas"],
+        "summary": "Aprenderás a integrar la IA en procesos humanos sin perder el control. Se analizan ejemplos de flujos manuales y automatizados, y se establecen criterios para decidir qué delegar y qué preservar.",
+        "conceptMap": "Tarea → ¿Automatizable? → Con IA / Sin IA",
+        "lessons": [
+          {
+            "title": "Combinaciones manuales con IA",
+            "content": "<p>Usuarios avanzados combinan herramientas como ChatGPT, Claude, ElevenLabs o Gemini en secuencias lógicas:</p><ol><li>Resumen con lector de PDF + IA</li><li>Síntesis con GPT</li><li>Análisis en hoja de cálculo con Copilot</li><li>Presentación generada automáticamente</li></ol>",
+            "visual": "<div class='timeline'><div class='timeline-item'><strong>Lector PDF + IA</strong> → Resumen</div><div class='timeline-item'><strong>GPT</strong> → Síntesis</div><div class='timeline-item'><strong>Copilot</strong> → Análisis</div><div class='timeline-item'><strong>Canva AI</strong> → Presentación</div></div>"
+          }
+        ],
+        "caseStudy": "Un investigador usa AskYourPDF para analizar 50 artículos, luego ChatGPT para sintetizar hallazgos, y finalmente DALL·E para ilustrar conceptos clave. Cada paso es supervisado y validado por él.",
+        "keyIdeas": [
+          "La IA es un colaborador, no un reemplazo",
+          "Cada paso debe ser verificado",
+          "Preserva las fronteras humanas"
+        ],
+        "quiz": [
+          {
+            "question": "¿Qué tarea NO debería automatizarse completamente?",
+            "options": [
+              "Generación de resúmenes",
+              "Revisión gramatical",
+              "Toma de decisiones éticas",
+              "Organización de datos"
+            ],
+            "correct": 2,
+            "feedback": "Correcto. Las decisiones éticas requieren juicio humano. La IA puede informar, pero no decidir."
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Del Oráculo a la Tribu",
+        "objectives": [
+          "Entender la evolución de los modelos de IA",
+          "Usar modelos pequeños (SLM)",
+          "Configurar IA local"
+        ],
+        "competencies": ["Conocimiento técnico", "Soberanía cognitiva", "Privacidad"],
+        "keywords": ["LLM", "SLM", "Ollama", "local", "privacidad"],
+        "summary": "Explora cómo los modelos pequeños (SLM) permiten usar IA de forma privada, offline y personalizada. Herramientas como Ollama, LM Studio y Mistral ponen el poder de la IA en tus manos sin depender de grandes corporaciones.",
+        "conceptMap": "LLM (nube) ↔ SLM (local) → Soberanía cognitiva",
+        "lessons": [
+          {
+            "title": "IA local con Ollama",
+            "content": "<p><strong>Ollama</strong> permite ejecutar modelos como LLaMA 3, Gemma o Mistral directamente en tu computadora. Ventajas:</p><ul><li>Privacidad total</li><li>Sin conexión requerida</li><li>Personalización avanzada</li></ul><p>Es una forma de <strong>soberanía cognitiva</strong>: usar IA sin exponer tus pensamientos.</p>",
+            "visual": "<svg class='svg-diagram' viewBox='0 0 400 150'><rect x='50' y='50' width='100' height='50' fill='#4a6fa5' rx='8'/><text x='100' y='80' fill='white' font-size='14' text-anchor='middle'>Tu PC</text><path d='M150,75 H200' stroke='#666' stroke-width='2' stroke-dasharray='5,5'/><rect x='200' y='50' width='100' height='50' fill='#d9534f' rx='8'/><text x='250' y='80' fill='white' font-size='14' text-anchor='middle'>Nube</text><circle cx='175' cy='75' r='10' fill='#f0ad4e'/><text x='175' y='100' font-size='12' text-anchor='middle'>Ollama</text></svg>"
+          }
+        ],
+        "caseStudy": "Un psicólogo usa un modelo LLM local para simular diálogos terapéuticos, sin arriesgar datos de pacientes. Solo él accede al contenido generado.",
+        "keyIdeas": [
+          "La IA local es más segura",
+          "Los SLM son ideales para tareas especializadas",
+          "La soberanía cognitiva es posible"
+        ],
+        "quiz": [
+          {
+            "question": "¿Qué ventaja ofrece Ollama frente a ChatGPT?",
+            "options": [
+              "Mayor velocidad de respuesta",
+              "Acceso a más datos",
+              "Ejecución offline y privacidad",
+              "Interfaz más amigable"
+            ],
+            "correct": 2,
+            "feedback": "Correcto. Ollama permite usar modelos de lenguaje sin conexión, protegiendo tu privacidad y datos."
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Infraestructura Invisible",
+        "objectives": [
+          "Reconocer los componentes técnicos de la IA",
+          "Gestionar costos y riesgos",
+          "Evaluar dependencias tecnológicas"
+        ],
+        "competencies": ["Gestión técnica", "Análisis de riesgos", "Sostenibilidad"],
+        "keywords": ["VPN", "VPS", "tokens", "costo", "infraestructura"],
+        "summary": "Detrás de cada interacción con IA hay una infraestructura invisible: servidores, APIs, tokens, consumo energético. Este módulo te ayuda a entender el costo real del pensamiento artificial.",
+        "conceptMap": "Usuario → API → Servidor → Energía → Costo",
+        "lessons": [
+          {
+            "title": "El costo oculto de la IA",
+            "content": "<p>Cada consulta a una IA consume:</p><ul><li><strong>Tokens:</strong> fragmentos de texto procesados</li><li><strong>Energía:</strong> computación intensiva</li><li><strong>Infraestructura:</strong> servidores, redes, almacenamiento</li></ul><p>Usar IA sin considerar esto es como conducir sin ver el medidor de gasolina.</p>",
+            "visual": "<div class='table'><table><tr><th>Consulta</th><th>Tokens</th><th>Costo estimado</th></tr><tr><td>Resumen corto</td><td>100</td><td>$0.001</td></tr><tr><td>Análisis profundo</td><td>1000</td><td>$0.01</td></tr></table></div>"
+          }
+        ],
+        "caseStudy": "Una startup usa IA para atención al cliente 24/7. Sin calcular el costo por token, su factura mensual supera el presupuesto. Al monitorear el uso, optimizan y reducen costos en un 60%.",
+        "keyIdeas": [
+          "La IA no es gratuita",
+          "Cada token tiene un costo",
+          "La eficiencia requiere medición"
+        ],
+        "quiz": [
+          {
+            "question": "¿Qué es un token en el contexto de IA?",
+            "options": [
+              "Una moneda cripto para pagar servicios",
+              "Un fragmento de texto procesado por el modelo",
+              "Un usuario registrado en la plataforma",
+              "Un tipo de error en la generación"
+            ],
+            "correct": 1,
+            "feedback": "Correcto. La tokenización es el proceso de dividir el texto en unidades que el modelo puede procesar matemáticamente."
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Ética, Atención y Poder",
+        "objectives": [
+          "Analizar sesgos en la IA",
+          "Promover justicia cognitiva",
+          "Desarrollar conciencia ética"
+        ],
+        "competencies": ["Razonamiento ético", "Justicia tecnológica", "Autocrítica"],
+        "keywords": ["ética", "sesgos", "justicia", "atención", "poder"],
+        "summary": "La IA no es neutral: refleja nuestros valores, sesgos y estructuras de poder. Este módulo explora cómo usar la IA con responsabilidad, evitando la automatización acrítica de decisiones humanas.",
+        "conceptMap": "Datos → Modelo → Sesgos → Impacto → Responsabilidad",
+        "lessons": [
+          {
+            "title": "La IA como espejo",
+            "content": "<p>Como dice el libro: <em>\"La IA no es neutra; refleja nuestros valores, sesgos y estructuras de poder\"</em>.</p><p>Si entrenamos IA con datos históricos sesgados, replicará discriminaciones. La ética no es opcional: es parte del diseño.</p>",
+            "visual": "<svg class='svg-diagram' viewBox='0 0 300 200'><circle cx='150' cy='100' r='80' fill='none' stroke='#4a6fa5' stroke-width='3'/><text x='150' y='80' text-anchor='middle' font-size='14'>IA</text><text x='150' y='120' text-anchor='middle' font-size='14'>= Espejo</text><text x='150' y='140' text-anchor='middle' font-size='12'>Refleja quiénes somos</text></svg>"
+          }
+        ],
+        "caseStudy": "Una empresa usa IA para seleccionar candidatos. Se descubre que el sistema discrimina por género. Tras auditar los datos y algoritmos, reentrenan el modelo con criterios equitativos.",
+        "keyIdeas": [
+          "La IA amplifica lo que valoramos",
+          "La supervisión humana es esencial",
+          "La ética debe ser proactiva"
+        ],
+        "quiz": [
+          {
+            "question": "¿Por qué la IA puede ser sesgada?",
+            "options": [
+              "Porque los desarrolladores son malos",
+              "Porque los datos de entrenamiento reflejan desigualdades reales",
+              "Porque los usuarios la usan mal",
+              "Porque los servidores están mal configurados"
+            ],
+            "correct": 1,
+            "feedback": "Correcto. Los modelos aprenden de datos del mundo real, que a menudo contienen sesgos históricos y sociales."
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Hacia una Inteligencia Situada",
+        "objectives": [
+          "Integrar sabiduría técnica y propósito humano",
+          "Cultivar pensamiento autónomo",
+          "Diseñar futuros deseables con IA"
+        ],
+        "competencies": ["Pensamiento sistémico", "Propósito", "Co-diseño"],
+        "keywords": ["sabiduría", "propósito", "co-inteligencia", "futuro", "humano"],
+        "summary": "El futuro no es usar mejor la IA, sino pensar mejor junto a ella. Este módulo sintetiza todo el aprendizaje en una visión de colaboración humana-tecnológica con sentido, ética y propósito.",
+        "conceptMap": "Técnica + Emoción + Propósito → Inteligencia Situada",
+        "lessons": [
+          {
+            "title": "Pensar mejor junto a la IA",
+            "content": "<p>Como dice el libro: <em>\"No se trata de usar mejor la IA, sino de pensar mejor junto a ella\"</em>.</p><p>La verdadera inteligencia situada combina:</p><ul><li><strong>Sabiduría técnica</strong> (saber cómo funciona)</li><li><strong>Emoción crítica</strong> (saber qué importa)</li><li><strong>Propósito humano</strong> (saber hacia dónde vamos)</li></ul>",
+            "visual": "<svg class='svg-diagram' viewBox='0 0 400 300'><circle cx='200' cy='100' r='60' fill='#4a6fa5' opacity='0.3'/><text x='200' y='90' text-anchor='middle'>Sabiduría Técnica</text><circle cx='140' cy='180' r='60' fill='#f0ad4e' opacity='0.3'/><text x='140' y='170' text-anchor='middle'>Emoción Crítica</text><circle cx='260' cy='180' r='60' fill='#5cb85c' opacity='0.3'/><text x='260' y='170' text-anchor='middle'>Propósito Humano</text><text x='200' y='260' text-anchor='middle' font-size='16' font-weight='bold'>Inteligencia Situada</text></svg>"
+          }
+        ],
+        "caseStudy": "Una escuela implementa tutores IA personalizados, pero los docentes mantienen el control pedagógico. Los estudiantes reciben apoyo individualizado, pero el sentido del aprendizaje sigue siendo humano.",
+        "keyIdeas": [
+          "La tecnología debe servir a la vida con sentido",
+          "La colaboración es clave",
+          "El humano siempre debe tener la última palabra"
+        ],
+        "quiz": [
+          {
+            "question": "¿Qué es la 'inteligencia situada'?",
+            "options": [
+              "Usar IA en cualquier lugar",
+              "Pensar mejor junto a la IA, con técnica, emoción y propósito",
+              "Tener más dispositivos conectados",
+              "Automatizar todas las decisiones"
+            ],
+            "correct": 1,
+            "feedback": "Correcto. La inteligencia situada integra sabiduría técnica, emoción crítica y propósito humano para una colaboración significativa con la IA."
+          }
+        ]
+      }
+    ],
+    "routes": {
+      "principiante": [1, 2, 5, 6],
+      "intermedio": [1, 2, 3, 4, 5, 6],
+      "técnico": [3, 4, 1, 2, 6]
+    },
+    "glossary": [
+      { "term": "IA", "definition": "Inteligencia Artificial: sistemas que simulan capacidades humanas como el razonamiento o el aprendizaje." },
+      { "term": "SLM", "definition": "Modelo de Lenguaje Pequeño: modelo de IA más ligero, eficiente y adaptable a dispositivos locales." },
+      { "term": "LLM", "definition": "Modelo de Lenguaje Grande: modelo de IA con miles de millones de parámetros, generalmente en la nube." },
+      { "term": "Soberanía cognitiva", "definition": "Capacidad del individuo para controlar sus procesos mentales con asistencia tecnológica, sin intermediarios." },
+      { "term": "Token", "definition": "Unidad mínima de texto procesada por un modelo de lenguaje." }
+    ],
+    "badges": [
+      { "id": "mapa", "name": "Cartógrafo del Pensamiento", "desc": "Completaste el Módulo 1" },
+      { "id": "flujo", "name": "Diseñador de Flujos", "desc": "Completaste el Módulo 2" },
+      { "id": "local", "name": "Soberano Digital", "desc": "Completaste el Módulo 3" }
+    ],
+    "resources": [
+      "Ollama: https://ollama.ai",
+      "LM Studio: https://lmstudio.ai",
+      "Guía ética UNESCO: https://unesco.org/ia"
+    ]
+  }
+  </script>
+
+  <!-- Estado inicial del usuario -->
+  <script>
+    const userData = {
+      progress: {}, // módulo: completado (0-100)
+      badges: [],
+      points: 0,
+      level: 1,
+      streak: 0,
+      notes: {},
+      lastVisit: null,
+      quizAttempts: {}
+    };
+  </script>
+
+  <!-- Header -->
+  <header>
+    <h1>Minicampus: Antes del Clic</h1>
+    <p>Aprende a usar la IA con criterio, método y conciencia</p>
+  </header>
+
+  <!-- Topbar -->
+  <nav class="topbar">
+    <button id="menu-toggle" aria-label="Abrir menú">☰ Menú</button>
+    <input type="search" id="search-input" placeholder="Buscar en el minicampus..." />
+    <button class="btn btn-toggle-theme" id="theme-toggle">Modo Oscuro</button>
+  </nav>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <h3>Menú</h3>
+    <ul>
+      <li><a href="#home">Inicio</a></li>
+      <li><a href="#mapa">Mapa del Minicampus</a></li>
+      <li><a href="#modulos">Módulos</a></li>
+      <li><a href="#juegos">Laboratorio de Juegos</a></li>
+      <li><a href="#evaluaciones">Evaluaciones</a></li>
+      <li><a href="#glosario">Glosario</a></li>
+      <li><a href="#recursos">Recursos</a></li>
+      <li><a href="#etica">Ética y Buenas Prácticas</a></li>
+      <li><a href="#ayuda">Ayuda y Accesibilidad</a></li>
+      <li><a href="#dashboard">Mi Tablero</a></li>
+    </ul>
+  </aside>
+
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Main Content -->
+  <main class="main-content container" id="main-content">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb" id="breadcrumb">Estás en: <a href="#home">Inicio</a></div>
+
+    <!-- Home -->
+    <section id="home" class="active">
+      <div class="card">
+        <h2>Bienvenido al Minicampus</h2>
+        <p><strong>"Antes del Clic"</strong> es un espacio para repensar cómo usamos la Inteligencia Artificial. No se trata de dominar herramientas, sino de recuperar el pensamiento crítico, la planificación y la ética en cada interacción tecnológica.</p>
+        <p>Como dice el libro: <em>"El clic se vuelve automático, impulsivo, compulsivo. Se pierde el umbral. Ya no hay 'antes'. Este libro quiere recuperarlo."</em></p>
+        <div style="text-align: center; margin: 2rem 0;">
+          <button class="btn" onclick="navigateTo('#mapa')">Explorar el Mapa del Minicampus</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Mi Progreso</h3>
+        <div class="progress-bar">
+          <div class="progress-fill" id="global-progress" style="width: 0%"></div>
+        </div>
+        <p>Tu nivel: <span class="level-indicator">Nivel 1</span> | Racha: <span class="streak">0 días</span></p>
+        <p>Badges: <span id="user-badges">Ninguno aún</span></p>
+      </div>
+    </section>
+
+    <!-- Mapa del Minicampus -->
+    <section id="mapa" class="hidden">
+      <h2>🗺️ Mapa del Minicampus</h2>
+      <p>Este es el recorrido completo del minicampus. Cada módulo construye sobre el anterior, pero puedes elegir tu ruta.</p>
+
+      <div class="svg-diagram">
+        <svg viewBox="0 0 800 200" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="100" cy="100" r="40" fill="#4a6fa5" />
+          <text x="100" y="105" fill="white" font-size="14" text-anchor="middle">Módulo 1</text>
+          <text x="100" y="125" fill="white" font-size="12" text-anchor="middle">Planificación</text>
+          <path d="M140,100 H200" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+          
+          <circle cx="250" cy="100" r="40" fill="#62b5e5" />
+          <text x="250" y="105" fill="white" font-size="14" text-anchor="middle">Módulo 2</text>
+          <text x="250" y="125" fill="white" font-size="12" text-anchor="middle">Flujos</text>
+          <path d="M290,100 H350" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+
+          <circle cx="400" cy="100" r="40" fill="#f0ad4e" />
+          <text x="400" y="105" fill="white" font-size="14" text-anchor="middle">Módulo 3</text>
+          <text x="400" y="125" fill="white" font-size="12" text-anchor="middle">SLM</text>
+          <path d="M440,100 H500" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+
+          <circle cx="550" cy="100" r="40" fill="#5cb85c" />
+          <text x="550" y="105" fill="white" font-size="14" text-anchor="middle">Módulo 4</text>
+          <text x="550" y="125" fill="white" font-size="12" text-anchor="middle">Infra</text>
+          <path d="M590,100 H650" stroke="#666" stroke-width="2" marker-end="url(#arrow)" />
+
+          <circle cx="700" cy="100" r="40" fill="#d9534f" />
+          <text x="700" y="105" fill="white" font-size="14" text-anchor="middle">Módulo 5</text>
+          <text x="700" y="125" fill="white" font-size="12" text-anchor="middle">Ética</text>
+        </svg>
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="stroke-width">
+            <path d="M0,0 L0,6 L9,3 z" fill="#666"/>
+          </marker>
+        </defs>
+      </div>
+
+      <h3>Itinerarios Sugeridos</h3>
+      <div class="tab-container">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="principiante">Principiante</button>
+          <button class="tab-btn" data-tab="intermedio">Intermedio</button>
+          <button class="tab-btn" data-tab="tecnico">Técnico</button>
+        </div>
+        <div class="tab-content" id="principiante">
+          <p>Para quienes empiezan: enfoque en planificación, flujos básicos y ética.</p>
+          <ul>
+            <li>Módulo 1: El Mapa Antes del Territorio</li>
+            <li>Módulo 2: Flujo, Fricción y Frontera</li>
+            <li>Módulo 5: Ética, Atención y Poder</li>
+            <li>Módulo 6: Hacia una Inteligencia Situada</li>
+          </ul>
+        </div>
+        <div class="tab-content" id="intermedio">
+          <p>Ruta completa para una comprensión profunda.</p>
+          <ul>
+            <li>Todos los módulos en orden</li>
+          </ul>
+        </div>
+        <div class="tab-content" id="tecnico">
+          <p>Para usuarios técnicos: enfoque en SLM, infraestructura y privacidad.</p>
+          <ul>
+            <li>Módulo 3: Del Oráculo a la Tribu</li>
+            <li>Módulo 4: Infraestructura Invisible</li>
+            <li>Módulo 1: El Mapa Antes del Territorio</li>
+            <li>Módulo 6: Hacia una Inteligencia Situada</li>
+          </ul>
+        </div>
+      </div>
+
+      <button class="btn" onclick="navigateTo('#modulos')">Ir a los Módulos</button>
+    </section>
+
+    <!-- Módulos -->
+    <section id="modulos" class="hidden">
+      <h2>📚 Módulos de Aprendizaje</h2>
+      <div id="modules-list"></div>
+    </section>
+
+    <!-- Laboratorio de Juegos -->
+    <section id="juegos" class="hidden">
+      <h2>🎮 Laboratorio de Juegos</h2>
+      <p>Refuerza tu aprendizaje con juegos interactivos.</p>
+
+      <div class="game-card">
+        <h3>🎯 Empareja el Concepto</h3>
+        <p>Arrastra cada término a su definición correcta.</p>
+        <div class="match-game" id="match-game"></div>
+        <button class="btn" onclick="checkMatchGame()">Verificar</button>
+        <div id="match-feedback"></div>
+      </div>
+    </section>
+
+    <!-- Evaluaciones -->
+    <section id="evaluaciones" class="hidden">
+      <h2>📝 Evaluaciones</h2>
+      <p>Demuestra lo que has aprendido.</p>
+      
+      <div class="card">
+        <h3>Examen Final</h3>
+        <p>Responde 5 preguntas aleatorias de todos los módulos.</p>
+        <button class="btn" onclick="startFinalQuiz()">Iniciar Examen</button>
+        <div id="final-quiz-container"></div>
+      </div>
+    </section>
+
+    <!-- Glosario -->
+    <section id="glosario" class="hidden">
+      <h2>📖 Glosario</h2>
+      <div id="glossary-list"></div>
+    </section>
+
+    <!-- Recursos -->
+    <section id="recursos" class="hidden">
+      <h2>🔗 Recursos</h2>
+      <ul id="resources-list"></ul>
+    </section>
+
+    <!-- Ética -->
+    <section id="etica" class="hidden">
+      <h2>⚖️ Ética y Buenas Prácticas</h2>
+      <div class="callout ethics">
+        <p><strong>Principios rectores:</strong></p>
+        <ul>
+          <li>Primacía del ser humano</li>
+          <li>Transparencia y explicabilidad</li>
+          <li>Diversidad y equidad</li>
+          <li>Responsabilidad última en humanos</li>
+        </ul>
+      </div>
+      <p>La IA debe potenciar, nunca reemplazar, el juicio humano.</p>
+    </section>
+
+    <!-- Ayuda -->
+    <section id="ayuda" class="hidden">
+      <h2>❓ Ayuda y Accesibilidad</h2>
+      <div class="accordion">
+        <div class="accordion-header">¿Cómo navego?</div>
+        <div class="accordion-body">
+          <p>Usa el menú lateral o los enlaces. Todo es navegable con teclado (Tab, Enter).</p>
+        </div>
+      </div>
+      <div class="accordion">
+        <div class="accordion-header">¿Cómo guardo mi progreso?</div>
+        <div class="accordion-body">
+          <p>Tu progreso se guarda automáticamente con localStorage. No necesitas registrarte.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="dashboard" class="hidden">
+      <h2>📊 Mi Tablero</h2>
+      <div class="user-dashboard">
+        <div class="dashboard-card">
+          <h3>Progreso</h3>
+          <div class="progress-bar">
+            <div class="progress-fill" id="dashboard-progress"></div>
+          </div>
+        </div>
+        <div class="dashboard-card">
+          <h3>Logros</h3>
+          <div id="dashboard-badges">Cargando...</div>
+        </div>
+      </div>
+      <div class="notes-export">
+        <h3>Mis Apuntes</h3>
+        <p>Exporta tus resúmenes y notas personales.</p>
+        <button class="btn btn-print" onclick="exportNotes()">Exportar como PDF</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal-overlay"></div>
+  <div class="modal hidden" id="modal">
+    <h2 id="modal-title">Título</h2>
+    <div id="modal-content"></div>
+    <p><button class="btn" onclick="closeModal()">Cerrar</button></p>
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    // Cargar datos del campus
+    const campusData = JSON.parse(document.getElementById('campus-data').textContent);
+    const modules = campusData.modules;
+    const glossary = campusData.glossary;
+    const badges = campusData.badges;
+
+    // Restaurar progreso del usuario
+    const savedData = localStorage.getItem('campus-user-data');
+    if (savedData) {
+      Object.assign(userData, JSON.parse(savedData));
+    } else {
+      updateUserData();
+    }
+
+    // Actualizar interfaz con datos del usuario
+    function updateUserData() {
+      document.querySelector('.level-indicator').textContent = `Nivel ${userData.level}`;
+      document.querySelector('.streak').textContent = `${userData.streak} días`;
+      document.getElementById('user-badges').textContent = userData.badges.length > 0 ? userData.badges.map(id => badges.find(b => b.id === id)?.name || id).join(', ') : 'Ninguno aún';
+      document.getElementById('global-progress').style.width = `${calculateGlobalProgress()}%`;
+      document.getElementById('dashboard-progress').style.width = `${calculateGlobalProgress()}%`;
+      
+      // Mostrar badges en dashboard
+      const dashboardBadges = document.getElementById('dashboard-badges');
+      if (userData.badges.length === 0) {
+        dashboardBadges.textContent = 'Aún no tienes badges. ¡Completa módulos!';
+      } else {
+        dashboardBadges.innerHTML = userData.badges.map(id => {
+          const badge = badges.find(b => b.id === id);
+          return `<span class="badge">${badge?.name}</span>`;
+        }).join('');
+      }
+    }
+
+    function calculateGlobalProgress() {
+      if (modules.length === 0) return 0;
+      const total = modules.reduce((sum, m) => sum + (userData.progress[m.id] || 0), 0);
+      return Math.round(total / modules.length);
+    }
+
+    // Navegación
+    function navigateTo(sectionId) {
+      document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+      document.querySelector(sectionId).classList.remove('hidden');
+      updateBreadcrumb(sectionId);
+      saveState();
+    }
+
+    function updateBreadcrumb(sectionId) {
+      const labels = {
+        '#home': 'Inicio',
+        '#mapa': 'Mapa del Minicampus',
+        '#modulos': 'Módulos',
+        '#juegos': 'Laboratorio de Juegos',
+        '#evaluaciones': 'Evaluaciones',
+        '#glosario': 'Glosario',
+        '#recursos': 'Recursos',
+        '#etica': 'Ética y Buenas Prácticas',
+        '#ayuda': 'Ayuda y Accesibilidad',
+        '#dashboard': 'Mi Tablero'
+      };
+      const label = labels[sectionId] || 'Sección';
+      document.getElementById('breadcrumb').innerHTML = `Estás en: <a href="${sectionId}">${label}</a>`;
+    }
+
+    // Menú
+    document.getElementById('menu-toggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.add('open');
+      document.getElementById('overlay').style.display = 'block';
+    });
+
+    document.getElementById('overlay').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('overlay').style.display = 'none';
+    });
+
+    // Tema oscuro/claro
+    const themeToggle = document.getElementById('theme-toggle');
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+      document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      themeToggle.textContent = isDark ? 'Modo Oscuro' : 'Modo Claro';
+    });
+
+    // Búsqueda
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      if (query.length < 2) return;
+      alert(`Búsqueda implementada: "${query}" (en un sistema real, mostraría resultados relevantes)`);
+    });
+
+    // Tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).style.display = 'block';
+      });
+    });
+
+    // Acordiones
+    document.querySelectorAll('.accordion-header').forEach(header => {
+      header.addEventListener('click', () => {
+        header.classList.toggle('active');
+        const body = header.nextElementSibling;
+        body.classList.toggle('open');
+      });
+    });
+
+    // Renderizar módulos
+    function renderModules() {
+      const container = document.getElementById('modules-list');
+      container.innerHTML = '';
+      modules.forEach(mod => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <h3>${mod.title}</h3>
+          <p><strong>Objetivos:</strong> ${mod.objectives[0]}</p>
+          <p>${mod.summary.substring(0, 120)}...</p>
+          <button class="btn" onclick="viewModule(${mod.id})">Ver Módulo</button>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function viewModule(id) {
+      const mod = modules.find(m => m.id === id);
+      if (!mod) return;
+      showModal(mod.title, `
+        <div class="stepper">
+          <div class="step active">Introducción</div>
+          <div class="step">Contenido</div>
+          <div class="step">Aplicación</div>
+        </div>
+        <h3>Resumen</h3>
+        <p>${mod.summary}</p>
+        <h3>Palabras clave</h3>
+        <p>${mod.keywords.map(k => `<span class="highlight">${k}</span>`).join(', ')}</p>
+        <h3>Mapa conceptual</h3>
+        <p><em>${mod.conceptMap}</em></p>
+        <h3>Lecciones</h3>
+        ${mod.lessons.map(les => `
+          <div class="card">
+            <h4>${les.title}</h4>
+            ${les.content}
+            ${les.visual || ''}
+            ${les.activity ? `<div class="callout note"><strong>Actividad:</strong> ${les.activity}</div>` : ''}
+          </div>
+        `).join('')}
+        <h3>Estudio de caso</h3>
+        <div class="callout">${mod.caseStudy}</div>
+        <h3>Ideas clave</h3>
+        <ul>${mod.keyIdeas.map(k => `<li>${k}</li>`).join('')}</ul>
+        <h3>Autoevaluación</h3>
+        <div class="quiz">
+          ${renderQuiz(mod.quiz[0])}
+        </div>
+        <button class="btn success" onclick="completeModule(${id})">Marcar como completado</button>
+      `);
+    }
+
+    function renderQuiz(quiz) {
+      return `
+        <p>${quiz.question}</p>
+        <div class="options">
+          ${quiz.options.map((opt, i) => `
+            <label>
+              <input type="radio" name="quiz-${quiz.correct}" value="${i}">
+              ${opt}
+            </label>
+          `).join('')}
+        </div>
+        <button class="btn" onclick="submitQuiz(${quiz.correct})">Enviar</button>
+        <div class="feedback hidden" id="quiz-feedback"></div>
+      `;
+    }
+
+    function submitQuiz(correctIndex) {
+      const selected = document.querySelector(`input[name="quiz-${correctIndex}"]:checked`);
+      const feedbackEl = document.getElementById('quiz-feedback');
+      if (!selected) {
+        feedbackEl.textContent = 'Selecciona una respuesta.';
+        feedbackEl.classList.remove('hidden');
+        return;
+      }
+      const isCorrect = parseInt(selected.value) === correctIndex;
+      feedbackEl.innerHTML = isCorrect 
+        ? '<p>✅ ¡Correcto! ' + modules[0].quiz[0].feedback + '</p>' 
+        : '<p>❌ Incorrecto. Revisa el contenido.</p>';
+      feedbackEl.classList.remove('hidden');
+    }
+
+    function completeModule(id) {
+      userData.progress[id] = 100;
+      userData.points += 100;
+      userData.level = Math.floor(userData.points / 500) + 1;
+      const badgeId = ['mapa', 'flujo', 'local'][id - 1];
+      if (badgeId && !userData.badges.includes(badgeId)) {
+        userData.badges.push(badgeId);
+        alert(`🎉 ¡Nuevo badge desbloqueado: ${badges.find(b => b.id === badgeId)?.name}!`);
+      }
+      updateUserData();
+      saveState();
+      alert('Módulo completado. ¡Felicitaciones!');
+    }
+
+    // Juegos
+    function initMatchGame() {
+      const terms = ['IA', 'SLM', 'Token', 'Soberanía cognitiva'];
+      const defs = [
+        'Sistemas que simulan capacidades humanas',
+        'Modelo de lenguaje pequeño y eficiente',
+        'Unidad mínima de texto procesado',
+        'Control sobre procesos mentales con asistencia tecnológica'
+      ];
+      const pairs = terms.map((t, i) => ({ term: t, def: defs[i] }));
+      shuffleArray(pairs);
+      const game = document.getElementById('match-game');
+      game.innerHTML = '';
+      pairs.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'match-item';
+        item.draggable = true;
+        item.textContent = p.term;
+        item.dataset.match = p.def;
+        game.appendChild(item);
+      });
+      const defsDiv = document.createElement('div');
+      defsDiv.className = 'match-item';
+      defsDiv.innerHTML = defs.map(d => `<div class="match-item" data-target>${d}</div>`).join('');
+      game.appendChild(defsDiv);
+    }
+
+    function checkMatchGame() {
+      const feedback = document.getElementById('match-feedback');
+      feedback.textContent = 'Funcionalidad de verificación en demo.';
+      feedback.classList.remove('hidden');
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    // Evaluaciones
+    function startFinalQuiz() {
+      const container = document.getElementById('final-quiz-container');
+      const quiz = modules[0].quiz; // En demo, usa primera pregunta
+      container.innerHTML = renderQuiz(quiz[0]);
+    }
+
+    // Glosario
+    function renderGlossary() {
+      const container = document.getElementById('glossary-list');
+      container.innerHTML = '<dl>';
+      glossary.forEach(item => {
+        container.innerHTML += `<dt><strong>${item.term}</strong></dt><dd>${item.def}</dd>`;
+      });
+      container.innerHTML += '</dl>';
+    }
+
+    // Recursos
+    function renderResources() {
+      const container = document.getElementById('resources-list');
+      campusData.resources.forEach(r => {
+        const li = document.createElement('li');
+        li.innerHTML = `<a href="${r.split(' ')[1]}" target="_blank">${r}</a>`;
+        container.appendChild(li);
+      });
+    }
+
+    // Modales
+    function showModal(title, content) {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-content').innerHTML = content;
+      document.getElementById('modal').classList.remove('hidden');
+      document.getElementById('modal-overlay').style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+      document.getElementById('modal-overlay').style.display = 'none';
+    }
+
+    // Exportar notas
+    function exportNotes() {
+      alert('Funcionalidad de exportación. En un sistema real, generaría un PDF con tus apuntes.');
+    }
+
+    // Guardar estado
+    function saveState() {
+      userData.lastVisit = new Date().toISOString();
+      localStorage.setItem('campus-user-data', JSON.stringify(userData));
+    }
+
+    // Inicializar
+    window.addEventListener('load', () => {
+      updateUserData();
+      renderModules();
+      renderGlossary();
+      renderResources();
+      initMatchGame();
+      navigateTo('#home');
+    });
+
+    // Navegación suave
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        navigateTo(this.getAttribute('href'));
+      });
+    });
+  </script>
+</body>
+</html>
